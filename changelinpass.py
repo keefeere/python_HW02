@@ -5,6 +5,14 @@ import os
 import random
 import string
 
+
+# TODO: Rewrite in OOP Paradigm.
+# TODO: Create class for external call
+# TODO: Create class for password
+# TODO: Create class for user input?
+
+
+
 # Define the main function
 def main():
     # TODO: Write the main logic of the program here
