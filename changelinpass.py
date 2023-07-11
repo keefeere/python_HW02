@@ -1,137 +1,125 @@
-# This is a Python program template for Linux chpasswd simulation
+#!/usr/bin/env python3
 
-# Import the modules you need
+
+##Linux strong password generator and changer y KeeFeeRe(c)2023
+
 import os
-import random
+import getpass
+import subprocess
 import string
-
-
-# TODO: Rewrite in OOP Paradigm.
-# TODO: Create class for external call
-# TODO: Create class for password
-# TODO: Create class for user input?
+import random
 
 
 
-# Define the main function
-def main():
-    # TODO: Write the main logic of the program here
-    # Generated code below, rewrite
+# Define global variables with the possible characters for the password using the string module
+# https://docs.python.org/3/library/string.html
+uppercase_letters = string.ascii_uppercase
+lowercase_letters = string.ascii_lowercase
+numbers = string.digits
+special_characters = string.punctuation
 
-    
-    # Prompt the user to enter a username
-    username = input("Enter a username: ")
-    # TODO: check user input for meets linux user naming criterias?
-
-    # Check if user exist in system
-    # Dunno if proposed method is legal?
-    if os.path.exists(f"/home/{username}"):
-        # User exists, proceed to password change
-        print(f"User {username} found.")
-        change_password(username)
-    else:
-        # User does not exist, print an error message and exit
-        print(f"User {username} does not exist.")
-        exit()
-
-# Define the change_password function
-def change_password(username):
-    # TODO: Write the code for changing password here
-    # Generated code below, rewrite
+# Define the minimum and maximum password length
+def_length = 8
 
 
-    # Ask the user to input a password or generate a new one if not provided
-    password = input("Enter a password or press enter to generate one: ")
-    if not password:
-        # No password provided, generate a random one
-        password = generate_password()
-        print(f"Generated password: {password}")
+class PasswordGenerator:
+    def generate_password(self, lenght):
+        # Initialize an empty password
+        password = ""
 
-    # Check the password against specified requirements
-    requirements = check_password(password)
-
-    # Change password for user using os.system command
-    os.system(f"echo '{username}:{password}' | sudo chpasswd")
-
-    # Print the results, including the username, the original or generated password, and whether the password meets the requirements
-    print(f"Password changed for user {username}.")
-    print(f"Password: {password}")
-    print(f"Password meets requirements: {requirements}")
-
-# Define the generate_password function
-def generate_password():
-    # TODO: Write the code for generating a random password here
-    # We can reuse code from prewious work
-
-    # Set the minimum length and the character types for the password
-    # Moove to definitions of constants 
-    min_length = 8
-    char_types = [string.ascii_lowercase, string.ascii_uppercase, string.digits, string.punctuation]
-
-    # Initialize an empty password and a list of random indices
-    password = ""
-    indices = []
-
-
-    # Generated code below, rewrite
-    # Loop until the password meets the minimum length
-    while len(password) < min_length:
-        # Choose a random character type and a random character from it
-        char_type = random.choice(char_types)
-        char = random.choice(char_type)
-
-        # Append the character to the password and its index to the indices list
-        password += char
-        indices.append(char_types.index(char_type))
-
-    # Shuffle the password to avoid patterns
-    password = "".join(random.sample(password, len(password)))
-
-    # Check if the password contains at least one character from each type
-    if len(set(indices)) == len(char_types):
-        # Password is valid, return it
+        # Loop until the password is valid
+        while not PasswordValidator().check_password_requirements(password, lenght):
+            # Reset the password to empty string
+            password = ""
+            # Generate a random password of the desired length using the string module's join method 
+            # https://www.w3schools.com/python/ref_random_choices.asp
+            password = "".join(random.choices(uppercase_letters + lowercase_letters + numbers + special_characters, k=lenght))
         return password
+
+
+class PasswordValidator:
+    def check_password_requirements(self, password, lenght):
+        # Define the minimum length requirement
+        if len(password) < lenght:
+            return False
+
+        # Check for the presence of different character types
+        # https://stackoverflow.com/questions/39356688/python-2-7-if-not-any-syntax
+        # Check if the password contains at least one uppercase letter
+        if not any(char in uppercase_letters for char in password):
+            return False
+        # Check if the password contains at least one lowercase letter
+        if not any(char in lowercase_letters for char in password):
+            return False
+        # Check if the password contains at least one number
+        if not any(char in numbers for char in password):
+            return False
+        # Check if the password contains at least one special character
+        if not any(char in special_characters for char in password):
+            return False
+        # If all the checks pass, return True
+        return True
+
+
+class PasswordChanger:
+    def change_password(self, username, password):
+        ##TODO: Rewrite. Not Working
+        try:
+            subprocess.run(['passwd', username], input=password.encode(), check=True)
+            return True
+        except subprocess.CalledProcessError:
+            return False
+
+class UserInputValidator:
+    def validate_username(self, username):
+        command = f"id -u {username} >/dev/null 2>&1"
+        return subprocess.call(command, shell=True) == 0
+
+
+def main():
+
+    ##TODO: Check if OS is linux if not = goodbuy
+
+    # Check if the program is running with administrative privileges
+    if not check_admin_privileges():
+        print("This program needs to be run with administrative privileges.")
+        return
+
+    # Prompt the user to enter a username
+    ##TODO: cycle if empty responce, exit if KeyboardInterrupt
+    username = input("Enter the username: ")
+
+    # Check if the user exists in the system
+    if not UserInputValidator().validate_username(username):
+        print(f"User '{username}' does not exist.")
+        return
+
+    # Prompt the user to enter a password or generate a new one
+    ##TODO: exit if KeyboardInterrupt
+    password = getpass.getpass("Enter a new password (leave blank to generate one): ")
+    if not password:
+        password = PasswordGenerator().generate_password(def_length)
+
+    # Check if the password meets the requirements
+    ##TODO: cycle if does not meet
+    if not PasswordValidator().check_password_requirements(password, def_length):
+        print("The password does not meet the requirements.")
+        return
+
+     # Change the password for the user
+    password_changer = PasswordChanger()
+    if password_changer.change_password(username, password):
+        print("Password changed successfully!")
+        print(f"Username: {username}")
+        print(f"Password: {password}")
+        print("Meets requirements: Yes")
     else:
-        # Password is invalid, generate a new one recursively
-        return generate_password()
+        print("An error occurred while changing the password.")
 
-# Define the check_password function
-def check_password(password):
-    # TODO: Write the code for checking the password against specified requirements here
-    # This fuction may be used for checking own and generated passwords
 
-    # Generated code below, rewrite
-    # Set the minimum length and the character types for the password
-    min_length = 8
-    char_types = [string.ascii_lowercase, string.ascii_uppercase, string.digits, string.punctuation]
+def check_admin_privileges():
+    return os.geteuid() == 0
 
-    # Initialize a boolean variable to store the result and a list of counts for each character type
-    result = True
-    counts = [0] * len(char_types)
 
-    # Loop through each character in the password
-    for char in password:
-        # Find its character type and increment its count in the list
-        for i, char_type in enumerate(char_types):
-            if char in char_type:
-                counts[i] += 1
-
-    # Check if the password meets the minimum length requirement
-    if len(password) < min_length:
-        # Password is too short, set result to False and print a message
-        result = False
-        print(f"Password is too short. Minimum length is {min_length}.")
-
-    # Check if the password contains at least one character from each type
-    for i, count in enumerate(counts):
-        if count == 0:
-            # Password is missing a character type, set result to False and print a message
-            result = False
-            print(f"Password is missing {char_types[i][0]} characters.")
-
-    # Return the result as a boolean value
-    return result
-
-# Call the main function
 if __name__ == "__main__":
     main()
