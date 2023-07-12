@@ -8,6 +8,7 @@ import getpass
 import subprocess
 import string
 import random
+from sys import platform #for detecting os platform
 
 
 
@@ -79,7 +80,9 @@ class UserInputValidator:
 
 def main():
 
-    ##TODO: Check if OS is linux if not = goodbuy
+    if not (platform == "linux" or platform == "linux2"): 
+        print("Detected platform is", platform, "\nThis program runs only on Linux platform. Sorry")
+        return
 
     # Check if the program is running with administrative privileges
     if not check_admin_privileges():
