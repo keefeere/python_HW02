@@ -22,22 +22,23 @@ special_characters = string.punctuation
 def_length = 8
 
 
-class PasswordGenerator:
+class NewPassword:
+    """
+    Class for generating new password or validate the one that was entered by user
+    """
+    
     def generate_password(self, lenght):
         # Initialize an empty password
         password = ""
 
         # Loop until the password is valid
-        while not PasswordValidator().check_password_requirements(password, lenght):
+        while not NewPassword().check_password_requirements(password, lenght):
             # Reset the password to empty string
             password = ""
             # Generate a random password of the desired length using the string module's join method 
             # https://www.w3schools.com/python/ref_random_choices.asp
             password = "".join(random.choices(uppercase_letters + lowercase_letters + numbers + special_characters, k=lenght))
         return password
-
-
-class PasswordValidator:
     def check_password_requirements(self, password, lenght):
         # Define the minimum length requirement
         if len(password) < lenght:
@@ -60,7 +61,7 @@ class PasswordValidator:
         # If all the checks pass, return True
         return True
 
-
+    
 class PasswordChanger:
     def change_password(self, username, password):
         ##TODO: Rewrite. Not Working
@@ -98,11 +99,11 @@ def main():
     ##TODO: exit if KeyboardInterrupt
     password = getpass.getpass("Enter a new password (leave blank to generate one): ")
     if not password:
-        password = PasswordGenerator().generate_password(def_length)
+        password = NewPassword().generate_password(def_length)
 
     # Check if the password meets the requirements
     ##TODO: cycle if does not meet
-    if not PasswordValidator().check_password_requirements(password, def_length):
+    if not NewPassword().check_password_requirements(password, def_length):
         print("The password does not meet the requirements.")
         return
 
