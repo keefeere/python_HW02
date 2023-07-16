@@ -2,13 +2,15 @@
 
 # Linux strong password generator and changer by KeeFeeRe(c)2023
 
+import platform
 import os
 import getpass
 import subprocess
 import string
 import random
-from sys import platform  # for detecting os platform
 
+# Define the minimum and maximum password length
+def_length = 8
 
 # Define global variables with the possible characters for the password using the string module
 # https://docs.python.org/3/library/string.html
@@ -16,9 +18,6 @@ uppercase_letters = string.ascii_uppercase
 lowercase_letters = string.ascii_lowercase
 numbers = string.digits
 special_characters = string.punctuation
-
-# Define the minimum and maximum password length
-def_length = 8
 
 
 class NewPassword:
@@ -35,7 +34,8 @@ class NewPassword:
             # Reset the password to an empty string
             password = ""
             # Generate a random password of the desired length using the string module's join method
-            password = "".join(random.choices(uppercase_letters + lowercase_letters + numbers + special_characters, k=length))
+            password = "".join(
+                random.choices(uppercase_letters + lowercase_letters + numbers + special_characters, k=length))
         return password
 
     def check_password_requirements(self, password, length):
@@ -88,45 +88,58 @@ class UserInputValidator:
 
 
 def main():
-    if not (platform == "linux" or platform == "linux2"):
-        print("Detected platform is", platform, "\nThis program runs only on Linux platform. Sorry")
-        return
+    try:
+        if not (platform.system() == "Linux"):
+            print(f"Detected platform is {platform.system()}. This program runs only on Linux platform. Sorry")
+            return
 
-    # Check if the program is running with administrative privileges
-    if not check_admin_privileges():
-        print("This program needs to be run with administrative privileges.")
-        return
+        # Check if the program is running with administrative privileges
+        if not check_admin_privileges():
+            print("This program needs to be run with administrative privileges.")
+            return
 
-    # Prompt the user to enter a username
-    ##TODO: cycle if empty response, exit if KeyboardInterrupt
-    username = input("Enter the username: ")
+        max_attempts = 3
+        for attempt in range(1, max_attempts + 1):
 
-    # Check if the user exists in the system
-    if not UserInputValidator().validate_username(username):
-        print(f"User '{username}' does not exist.")
-        return
+            # Prompt the user to enter a username
+            username = input("Enter the username: ")
+            if not username:
+                print("You entered an empty value. Please enter a username.")
+                continue
 
-    # Prompt the user to enter a password or generate a new one
-    # TODO: exit if KeyboardInterrupt
-    password = getpass.getpass("Enter a new password (leave blank to generate one): ")
-    if not password:
-        password = NewPassword().generate_password(def_length)
+            # Check if the user exists in the system
+            if not UserInputValidator().validate_username(username):
+                print(f"User '{username}' does not exist. Please, check the data and try again.")
+                return
 
-    # Check if the password meets the requirements
-    # TODO: cycle if does not meet
-    if not NewPassword().check_password_requirements(password, def_length):
-        print("The password does not meet the requirements.")
-        return
+            # Prompt the user to enter a password or generate a new one
+            password = getpass.getpass("Enter a new password (leave blank to generate one): ")
+            if not password:
+                password = NewPassword().generate_password(def_length)
 
-    # Change the password for the user
-    password_changer = PasswordChanger()
-    if password_changer.change_password(username, password):
-        print("Password changed successfully!")
-        print(f"Username: {username}")
-        print(f"Password: {password}")
-        print("Meets requirements: Yes")
-    else:
-        print("An error occurred while changing the password.")
+            # Check if the password meets the requirements
+            if not NewPassword().check_password_requirements(password, def_length):
+                print("The password does not meet the requirements. Please try again.")
+                continue
+
+            # Change the password for the user
+            password_changer = PasswordChanger()
+            if password_changer.change_password(username, password):
+                print("Password changed successfully!")
+                print(f"Username: {username}")
+                print(f"Password: {password}")
+                print("Meets requirements: Yes")
+                break
+            else:
+                print("An error occurred while changing the password.")
+
+        else:
+            print(f"You entered an incorrect value {max_attempts} times. Please check the input and try again.")
+
+    # exit if KeyboardInterrupt  (Ctrl+C is pressed)
+    except KeyboardInterrupt:
+        print("\nProgram interrupted by the user.")
+        exit(1)
 
 
 def check_admin_privileges():
