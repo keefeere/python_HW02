@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
-
-##Linux strong password generator and changer y KeeFeeRe(c)2023
+# Linux strong password generator and changer by KeeFeeRe(c)2023
 
 import os
 import getpass
 import subprocess
 import string
 import random
-from sys import platform #for detecting os platform
-
+from sys import platform  # for detecting os platform
 
 
 # Define global variables with the possible characters for the password using the string module
@@ -25,24 +23,24 @@ def_length = 8
 
 class NewPassword:
     """
-    Class for generating new password or validate the one that was entered by user
+    Class for generating a new password or validating the one entered by the user
     """
-    
-    def generate_password(self, lenght):
+
+    def generate_password(self, length):
         # Initialize an empty password
         password = ""
 
         # Loop until the password is valid
-        while not NewPassword().check_password_requirements(password, lenght):
-            # Reset the password to empty string
+        while not self.check_password_requirements(password, length):
+            # Reset the password to an empty string
             password = ""
-            # Generate a random password of the desired length using the string module's join method 
-            # https://www.w3schools.com/python/ref_random_choices.asp
-            password = "".join(random.choices(uppercase_letters + lowercase_letters + numbers + special_characters, k=lenght))
+            # Generate a random password of the desired length using the string module's join method
+            password = "".join(random.choices(uppercase_letters + lowercase_letters + numbers + special_characters, k=length))
         return password
-    def check_password_requirements(self, password, lenght):
+
+    def check_password_requirements(self, password, length):
         # Define the minimum length requirement
-        if len(password) < lenght:
+        if len(password) < length:
             return False
 
         # Check for the presence of different character types
@@ -62,15 +60,26 @@ class NewPassword:
         # If all the checks pass, return True
         return True
 
-    
+
 class PasswordChanger:
     def change_password(self, username, password):
-        ##TODO: Rewrite. Not Working
-        try:
-            subprocess.run(['passwd', username], input=password.encode(), check=True)
-            return True
-        except subprocess.CalledProcessError:
-            return False
+        """
+        Sets the user's password using the 'chpasswd' command with sudo privileges.
+        """
+        command = ['sudo', 'chpasswd']
+        input_string = f"{username}:{password}"
+
+        # Run the command with input string
+        subprocess.run(command, input=input_string, text=True)
+
+        # Save the password to a file
+        with open("password.txt", "w") as file:
+            file.write(f"Username: {username}\n")
+            file.write(f"Password: {password}")
+
+        print("\nThe password was successfully set and saved in the password.txt file")
+        return True
+
 
 class UserInputValidator:
     def validate_username(self, username):
@@ -79,8 +88,7 @@ class UserInputValidator:
 
 
 def main():
-
-    if not (platform == "linux" or platform == "linux2"): 
+    if not (platform == "linux" or platform == "linux2"):
         print("Detected platform is", platform, "\nThis program runs only on Linux platform. Sorry")
         return
 
@@ -90,7 +98,7 @@ def main():
         return
 
     # Prompt the user to enter a username
-    ##TODO: cycle if empty responce, exit if KeyboardInterrupt
+    ##TODO: cycle if empty response, exit if KeyboardInterrupt
     username = input("Enter the username: ")
 
     # Check if the user exists in the system
@@ -99,18 +107,18 @@ def main():
         return
 
     # Prompt the user to enter a password or generate a new one
-    ##TODO: exit if KeyboardInterrupt
+    # TODO: exit if KeyboardInterrupt
     password = getpass.getpass("Enter a new password (leave blank to generate one): ")
     if not password:
         password = NewPassword().generate_password(def_length)
 
     # Check if the password meets the requirements
-    ##TODO: cycle if does not meet
+    # TODO: cycle if does not meet
     if not NewPassword().check_password_requirements(password, def_length):
         print("The password does not meet the requirements.")
         return
 
-     # Change the password for the user
+    # Change the password for the user
     password_changer = PasswordChanger()
     if password_changer.change_password(username, password):
         print("Password changed successfully!")
