@@ -113,7 +113,14 @@ def main():
                 return
 
             # Prompt the user to enter a password or generate a new one
-            password = getpass.getpass("Enter a new password (leave blank to generate one): ")
+            password = getpass.getpass("Enter a new password\n"
+                                        "Password should meet secure requirements:\n"
+                                        f"    - at least {def_length} characters long\n"
+                                        "    - at least one of Uppercase letter\n"
+                                        "    - at leas one lowercase letter\n"
+                                        "    - at least one number\n"
+                                        f"    - at least one special character of {special_characters}\n"
+                                        "    or leave blank to generate one: ")
             if not password:
                 password = NewPassword().generate_password(def_length)
 
