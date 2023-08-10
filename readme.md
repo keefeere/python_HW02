@@ -4,8 +4,8 @@ This script allows you to change the password of a linux user.
 
 # Usage
 
-To run the script, if you wish to change other user's pass you need to have superuser (root) privileges
-then you should specify the username and the new password interactively.
+To run the script, if you wish to change other user's pass you need to have superuser (root) privileges.
+Then you should specify the username and the new password interactively.
 Script will validate user input - user for existance and password for meeting strong password requrements.
 Optionally program can generate strong password for you.
 
