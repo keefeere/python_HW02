@@ -93,16 +93,13 @@ def main():
             print(f"Detected platform is {platform.system()}. This program runs only on Linux platform. Sorry")
             return
 
-        # Check if the program is running with administrative privileges
-        if not check_admin_privileges():
-            print("This program needs to be run with administrative privileges.")
-            return
+        
 
         max_attempts = 3
         for attempt in range(1, max_attempts + 1):
 
             # Prompt the user to enter a username
-            username = input("Enter the username: ")
+            username = input("Welcome to secure password change application!\nEnter the username: ")
             if not username:
                 print("You entered an empty value. Please enter a username.")
                 continue
@@ -111,12 +108,19 @@ def main():
             if not UserInputValidator().validate_username(username):
                 print(f"User '{username}' does not exist. Please, check the data and try again.")
                 return
+            # Check whether we change pass for self or other user
+            if not getpass.getuser() == username :
+                # If not for self than check if the program is running with administrative privileges
+                if not check_admin_privileges():
+                   print("To change other user's password this program needs to be run with administrative privileges.\nPlease restart program with admin privileges")
+                   return
+
 
             # Prompt the user to enter a password or generate a new one
             password = getpass.getpass("Enter a new password\n"
                                         "Password should meet secure requirements:\n"
                                         f"    - at least {def_length} characters long\n"
-                                        "    - at least one of Uppercase letter\n"
+                                        "    - at least one uppercase letter\n"
                                         "    - at leas one lowercase letter\n"
                                         "    - at least one number\n"
                                         f"    - at least one special character of {special_characters}\n"
