@@ -64,21 +64,31 @@ class NewPassword:
 class PasswordChanger:
     def change_password(self, username, password):
         """
-        Sets the user's password using the 'chpasswd' command with sudo privileges.
+        Sets the user's password using the 'passwd' command with sudo privileges.
         """
-        command = ['sudo', 'chpasswd']
-        input_string = f"{username}:{password}"
 
-        # Run the command with input string
-        subprocess.run(command, input=input_string, text=True)
+         # Check whether we change pass for self or other user
+        if getpass.getuser() == username:
+            current_user_password = getpass.getpass("Yout trying to change own password.\nTo do that you should provide your current password: ")
+            command = f'echo "{current_user_password}\n{password}\n{password}" | passwd'
+        else:
+            command = f'echo "{password}\n{password}" | sudo passwd {username}'
 
-        # Save the password to a file
-        with open("password.txt", "w") as file:
-            file.write(f"Username: {username}\n")
-            file.write(f"Password: {password}")
+        # Run the command selected
+        result = subprocess.run(command, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
-        print("\nThe password was successfully set and saved in the password.txt file.\n")
-        return True
+        
+        if result.returncode == 0:
+            # Save the password to a file
+            with open("password.txt", "w") as file:
+                file.write(f"Username: {username}\n")
+                file.write(f"Password: {password}")
+
+            print("\nThe password was successfully set and saved in the password.txt file.\n")
+            return True
+        else:
+             print("\nSomething wen't wrond. Please check your input and try again\n")   
+             return True
 
 
 class UserInputValidator:
