@@ -119,9 +119,9 @@ def main():
             password = getpass.getpass("\nEnter a new password\n"
                                        "Password should meet secure requirements:\n"
                                        f"    - at least {def_length} characters long\n"
-                                       "    - at least one uppercase letter\n"
-                                       "    - at least one lowercase letter\n"
-                                       "    - at least one number\n"
+                                       f"    - at least one uppercase letter of {uppercase_letters}\n"
+                                       f"    - at least one lowercase letter of {lowercase_letters}\n"
+                                       f"    - at least one number of numbers {numbers}\n"
                                        f"    - at least one special character of {special_characters}\n"
                                        "    or leave blank to generate one: ")
             if not password:
