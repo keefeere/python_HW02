@@ -69,7 +69,7 @@ class PasswordChanger:
 
          # Check whether we change pass for self or other user
         if getpass.getuser() == username:
-            current_user_password = getpass.getpass("Yout trying to change own password.\nTo do that you should provide your current password: ")
+            current_user_password = getpass.getpass("You are trying to change your own password.\nTo do that you should provide your current password: ")
             command = f'echo "{current_user_password}\n{password}\n{password}" | passwd'
         else:
             command = f'echo "{password}\n{password}" | sudo passwd {username}'
